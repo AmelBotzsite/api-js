@@ -20,7 +20,9 @@
      "cheerio": "^1.0.0-rc.5",
       "node-fetch": "^2.6.1",
       "brainly-scraper": "^1.0.3",
-     "fs": "0.0.1-security"
+     "fs": "0.0.1-security",
+   "ssl-express-www": "^3.0.7",
+   "cors": "^2.8.5"
   },
   "bugs": {
     "url": "https://github.com/caliph71"
