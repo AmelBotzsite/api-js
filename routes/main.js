@@ -36,14 +36,18 @@ if (!req.query.q) return res.json({ status: 'error', error: 'Masukkan Parameter 
 res.json(await require('brainly-scraper')(req.query.q))
 })
 router.get('/hartatahta', async (req, res, next) => {
-if (!req.query.text) return res.json({ status: 'error', error: 'Masukkan Parameter q'})
+if (!req.query.text) return res.json({ status: 'error', error: 'Masukkan Parameter text'})
 res.type('png')
 res.send(await require('../lib/tahta').ht(req.query.text))
 })
 
 router.get('/otaku-latest', async (req, res, next) => {
+try {
 res.json(await latest())
 console.log(await latest())
+} catch {
+res.send('Error Not Responding, Please Chat Owner!!')
+}
 })
 
 router.get('/sstik', async (req, res, next) => {
