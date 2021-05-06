@@ -31,6 +31,65 @@ if (!req.query.url) return res.json({ status: null, error: 'Masukkan Parameter u
 b = await fetch('http://192.53.115.44/ocr?url='+req.query.url).then(v => v.json())
 res.send(b)
 })
+router.get('/nulis', async (req, res, next) => {
+	
+	if (!req.query.teks) return res.json({status: null, error: 'Masukkan Parameter teks' })
+	
+	teks = req.query.teks
+	
+	      split = teks.replace(/(\S+\s*){1,10}/g, "$&\n")
+	
+	      fixedHeight = split.split("\n").slice(0, 25).join("\\n")
+	
+	      console.log(split)
+	
+	      spawn("convert", [
+		      
+		                  "src/kertas/magernulis2.jpg",
+		      
+		                  "-font",
+		      
+		                  "src/font/212BabyGirl.otf",
+		      
+		                  "-size",
+		      
+		                  "958x1280",
+		      
+		                  "-pointsize",
+		      
+		                  "18",
+		      
+		                  "-interline-spacing",
+		      
+		                  "3",
+		      
+		                  "-annotate",
+		      
+		                  "+170+222",
+		      
+		                  fixedHeight,
+		      
+		                  "media/magernulis2.jpg"
+		      
+		               ])
+	
+	         .on("error", () => {
+		      
+		               console.log("error")
+		      
+		               res.send('Error')
+		      
+	      })
+	
+	         .on("exit", () =>
+		     
+		     {
+		      
+		               res.sendFile(__path + '/media/magernulis2.jpg')
+		      
+	      })
+	
+})
 router.get('/brainly', async (req, res, next) => {
 if (!req.query.q) return res.json({ status: 'error', error: 'Masukkan Parameter q'})
 res.json(await require('brainly-scraper')(req.query.q))
