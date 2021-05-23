@@ -6,108 +6,6 @@ var fetch = require('node-fetch')
 const latest = require('./otaku')
 const fs = require('fs')
 const axios = require('axios')
-const getBuffer = async (url, options) => {
-console.log({hasil: url})
-	try {
-		options ? options : {}
-		const res = await axios({
-			method: "get",
-			url,
-			headers: {
-				'DNT': 1,
-				'Upgrade-Insecure-Request': 1
-			},
-			...options,
-			responseType: 'arraybuffer'
-		})
-		return res.data
-	} catch (e) {
-		console.log(`Error : ${e}`)
-	}
-}
-
-router.get('/ocr', async (req, res, next) => {
-if (!req.query.url) return res.json({ status: null, error: 'Masukkan Parameter url'})
-b = await fetch('http://192.53.115.44/ocr?url='+req.query.url).then(v => v.json())
-res.send(b)
-})
-router.get('/nulis', async (req, res, next) => {
-	
-	if (!req.query.teks) return res.json({status: null, error: 'Masukkan Parameter teks' })
-	
-	teks = req.query.teks
-	
-	      split = teks.replace(/(\S+\s*){1,10}/g, "$&\n")
-	
-	      fixedHeight = split.split("\n").slice(0, 25).join("\\n")
-	
-	      console.log(split)
-	
-	      spawn("convert", [
-		      
-		                  "src/kertas/magernulis2.jpg",
-		      
-		                  "-font",
-		      
-		                  "src/font/212BabyGirl.otf",
-		      
-		                  "-size",
-		      
-		                  "958x1280",
-		      
-		                  "-pointsize",
-		      
-		                  "18",
-		      
-		                  "-interline-spacing",
-		      
-		                  "3",
-		      
-		                  "-annotate",
-		      
-		                  "+170+222",
-		      
-		                  fixedHeight,
-		      
-		                  "media/magernulis2.jpg"
-		      
-		               ])
-	
-	         .on("error", () => {
-		      
-		               console.log("error")
-		      
-		               res.send('Error')
-		      
-	      })
-	
-	         .on("exit", () =>
-		     
-		     {
-		      
-		               res.sendFile(__path + '/media/magernulis2.jpg')
-		      
-	      })
-	
-})
-router.get('/brainly', async (req, res, next) => {
-if (!req.query.q) return res.json({ status: 'error', error: 'Masukkan Parameter q'})
-res.json(await require('brainly-scraper')(req.query.q))
-})
-router.get('/hartatahta', async (req, res, next) => {
-if (!req.query.text) return res.json({ status: 'error', error: 'Masukkan Parameter text'})
-res.type('png')
-res.send(await require('../lib/tahta').ht(req.query.text))
-})
-
-router.get('/otaku-latest', async (req, res, next) => {
-try {
-res.json(await latest())
-console.log(await latest())
-} catch {
-res.send('Error Not Responding, Please Chat Owner!!')
-}
-})
 
 router.get('/sstik', async (req, res, next) => {
     var apikeyInput = 'FreeApi',
@@ -124,10 +22,33 @@ if (!url) return res.send({ status: false, info: 'Masukkan Parameter url'})
              res.json(vid)
          }) 
 })
-async function getVideo(URL) {
-b = await fetch('http://192.53.115.44/sstik?url='+URL).then(v => v.json())
-return b
-}
+					const puppeteer = require("puppeteer");
+
+				
+				async function getVideo(URL) {
+					    const browser = await puppeteer.launch({
+						            headless: true,
+						            args: ['--no-sandbox', '--disable-setuid-sandbox']
+					    });
+					    const page = await browser.newPage();
+					    await page.goto('https://snaptik.app/');
+					
+					    await page.type('#url', `${URL}`);
+					    await page.click('#send', { delay: 300 });
+					
+					    await page.waitForSelector('#download-block > div > a:nth-child(3)', {delay: 300});
+					    let mp4direct = await page.$eval("#download-block > div > a:nth-child(3)", (element) => {
+						            return element.getAttribute("href");
+					    });
+					    let image = await page.$eval("#div_download > section > div > div > div > article > div.zhay-left.left > img", (element) => {
+						            return element.getAttribute("src");
+					    });
+						let textInfo = await page.$eval('#div_download > section > div > div > div > article > div.zhay-middle.center > p:nth-child(2) > span', el => el.innerText);
+						let nameInfo = await page.$eval('#div_download > section > div > div > div > article > div.zhay-middle.center > h1 > a', el => el.innerText);
+						let timeInfo = await page.$eval('#div_download > section > div > div > div > article > div.zhay-middle.center > p:nth-child(3) > b', el => el.innerText);
+						browser.close();
+					    return { mp4direct, image, textInfo, nameInfo, timeInfo }
+				}
 router.all('/*', async (req, res, next) => {
 res.send(fs.readFileSync('./error.html', 'utf-8'))
 console.log(req)
