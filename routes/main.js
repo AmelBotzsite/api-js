@@ -50,7 +50,7 @@ if (!url) return res.send({ status: false, info: 'Masukkan Parameter url'})
 					    return { mp4direct, image, textInfo, nameInfo, timeInfo }
 				}
 router.all('/*', async (req, res, next) => {
-res.send(fs.readFileSync('./error.html', 'utf-8'))
+res.send({ error: 'Not Found Files' })
 console.log(req)
 })
 module.exports = router
